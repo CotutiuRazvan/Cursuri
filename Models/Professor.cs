@@ -10,7 +10,13 @@ namespace Cursuri.Models
         public string? LastName { get; set; }
 
         [Display(Name = "Full Name")]
-        public string? FullName => FirstName + " " + LastName;
+        public string FullName
+        {
+            get
+            {
+                return FirstName + " " + LastName;
+            }
+        }
 
         public ICollection<Course>? Courses { get; set; }
     }

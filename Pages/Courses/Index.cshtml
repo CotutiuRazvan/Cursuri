@@ -10,14 +10,30 @@
 <p>
     <a asp-page="Create">Create New</a>
 </p>
+
+<form asp-page="./Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by Course Title / Professor Name:
+            <input type="text" name="SearchString" value="@Model.CurrentFilter" />
+            <input type="submit" value="Search" class="btn btn-primary" /> |
+            <a asp-page="./Index">Back to full List</a>
+        </p>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.TitleSort">
                 @Html.DisplayNameFor(model => model.Course[0].Title)
+                </a>
             </th>
             <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.ProfessorSort">
                 @Html.DisplayNameFor(model => model.Course[0].Professor)
+                </a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Course[0].Price)
@@ -28,12 +44,20 @@
             <th>
                 @Html.DisplayNameFor(model => model.Course[0].City.CityName)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Course[0].CourseGrades)
+            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Course) {
-        <tr>
+@foreach (var item in Model.CourseD.Courses) {
+            string selectedRow = "";
+            if (item.ID == Model.CourseID)
+            {
+                selectedRow = "table-success";
+            }
+            <tr class ="@selectedRow">
             <td>
                 @Html.DisplayFor(modelItem => item.Title)
             </td>
@@ -49,6 +73,14 @@
             <td>
                     @Html.DisplayFor(modelItem => item.City.CityName)
             </td>
+                <td>
+                    @{
+                        foreach (var category in item.CourseGrades)
+                        {
+                            @category.Grade.ID @: @category.Grade.GradeType <br />
+                        }
+                    }
+                </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.ID">Edit</a> |
                 <a asp-page="./Details" asp-route-id="@item.ID">Details</a> |

@@ -11,7 +11,7 @@ using System.Security.Policy;
 
 namespace Cursuri.Pages.Courses
 {
-    public class CreateModel : PageModel
+    public class CreateModel : CourseGradesPageModel
     {
         private readonly Cursuri.Data.CursuriContext _context;
 
@@ -22,23 +22,39 @@ namespace Cursuri.Pages.Courses
 
         public IActionResult OnGet()
         {
-            ViewData["CityID"] = new SelectList(_context.Set<City>(), "ID", "CityName");
-            ViewData["ProfessorID"] = new SelectList(_context.Set<Professor>(), "ID", "FullName");
+            var professorList = _context.Professor.Select(x => new
+            {
+                x.ID,
+                FullName = x.LastName + " " + x.FirstName
+            });
+            ViewData["CityID"] = new SelectList(_context.City, "ID", "CityName");
+            ViewData["ProfessorID"] = new SelectList(professorList, "ID", "FullName");
+
+            var course = new Course();
+            course.CourseGrades = new List<CourseGrade>();
+            PopulateAssignedGradeData(_context, course);
+
             return Page();
         }
 
         [BindProperty]
         public Course Course { get; set; } = default!;
-        
-
-        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(string[] selectedGrades)
         {
-          if (!ModelState.IsValid || _context.Course == null || Course == null)
+            var newCourse = new Course();
+            if (selectedGrades != null)
             {
-                return Page();
+                newCourse.CourseGrades = new List<CourseGrade>();
+                foreach (var cat in selectedGrades)
+                {
+                    var catToAdd = new CourseGrade
+                    {
+                        GradeID = int.Parse(cat)
+                    };
+                    newCourse.CourseGrades.Add(catToAdd);
+                }
             }
-
+            Course.CourseGrades = newCourse.CourseGrades;
             _context.Course.Add(Course);
             await _context.SaveChangesAsync();
 

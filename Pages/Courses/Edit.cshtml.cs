@@ -11,7 +11,7 @@ using Cursuri.Models;
 
 namespace Cursuri.Pages.Courses
 {
-    public class EditModel : PageModel
+    public class EditModel : CourseGradesPageModel
     {
         private readonly Cursuri.Data.CursuriContext _context;
 
@@ -30,50 +30,60 @@ namespace Cursuri.Pages.Courses
                 return NotFound();
             }
 
-            var course =  await _context.Course.FirstOrDefaultAsync(m => m.ID == id);
-            if (course == null)
+            Course = await _context.Course
+                .Include(b => b.City)
+                .Include(b => b.CourseGrades).ThenInclude(b => b.Grade)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.ID == id);
+            if (Course == null)
             {
                 return NotFound();
             }
-            Course = course;
-            ViewData["CityID"] = new SelectList(_context.Set<City>(), "ID", "CityName");
-            ViewData["ProfessorID"] = new SelectList(_context.Set<Professor>(), "ID", "FullName");
+            PopulateAssignedGradeData(_context, Course);
+            var professorList = _context.Professor.Select(x => new
+            {
+                x.ID,
+                FullName = x.LastName + " " + x.FirstName
+            });
+
+            ViewData["CityID"] = new SelectList(_context.City, "ID", "CityName");
+            ViewData["ProfessorID"] = new SelectList(professorList, "ID", "FullName");
             return Page();
         }
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(int? id, string[] selectedGrades)
         {
-            if (!ModelState.IsValid)
+            if (id == null)
             {
-                return Page();
+                return NotFound();
             }
-
-            _context.Attach(Course).State = EntityState.Modified;
-
-            try
+            //se va include Author conform cu sarcina de la lab 2
+            var courseToUpdate = await _context.Course
+            .Include(i => i.City)
+            .Include(i => i.CourseGrades)
+            .ThenInclude(i => i.Grade)
+            .FirstOrDefaultAsync(s => s.ID == id);
+            if (courseToUpdate == null)
             {
+                return NotFound();
+            }
+            //se va modifica AuthorID conform cu sarcina de la lab 2
+            if (await TryUpdateModelAsync<Course>(
+            courseToUpdate,
+            "Course",
+            i => i.Title, i => i.Professor,
+            i => i.Price, i => i.StartingDate, i => i.CityID))
+            {
+                UpdateCourseGrades(_context, selectedGrades, courseToUpdate);
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CourseExists(Course.ID))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return RedirectToPage("./Index");
             }
 
-            return RedirectToPage("./Index");
-        }
-
-        private bool CourseExists(int id)
-        {
-          return (_context.Course?.Any(e => e.ID == id)).GetValueOrDefault();
+            UpdateCourseGrades(_context, selectedGrades, courseToUpdate);
+            PopulateAssignedGradeData(_context, courseToUpdate);
+            return Page();
         }
     }
 }

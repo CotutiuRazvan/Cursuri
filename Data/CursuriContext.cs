@@ -19,5 +19,7 @@ namespace Cursuri.Data
         public DbSet<Cursuri.Models.City>? City { get; set; }
 
         public DbSet<Cursuri.Models.Professor>? Professor { get; set; }
+
+        public DbSet<Cursuri.Models.Grade>? Grade { get; set; }
     }
 }
