@@ -1,13 +1,33 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Cursuri.Data;
+using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy =>
+   policy.RequireRole("Admin"));
+});
+
+
 // Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AuthorizeFolder("/Courses");
+    options.Conventions.AllowAnonymousToPage("/Courses/Index");
+    options.Conventions.AllowAnonymousToPage("/Courses/Details");
+    options.Conventions.AuthorizeFolder("/Members", "AdminPolicy");
+
+});
+
 builder.Services.AddDbContext<CursuriContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CursuriContext") ?? throw new InvalidOperationException("Connection string 'CursuriContext' not found.")));
 
+builder.Services.AddDbContext<LibraryIdentityContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("CursuriContext") ?? throw new InvalidOperationException("Connection string 'CursuriContext' not found.")));
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<LibraryIdentityContext>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -22,6 +42,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseAuthentication();;
 
 app.UseAuthorization();
 

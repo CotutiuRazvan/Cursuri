@@ -12,7 +12,7 @@ namespace Cursuri.Models
         public string? Title { get; set; }
 
         [Display(Name = "Pretul")]
-        [Column(TypeName = "decimal(6, 2)")]
+        [Column(TypeName = "decimal(0.01, 500)")]
         public decimal Price { get; set; }
 
         [DataType(DataType.Date)]
@@ -26,6 +26,7 @@ namespace Cursuri.Models
         [ForeignKey("Professor")]
         public int? ProfessorID { get; set; }
         public Professor? Professor { get; set; }
+       
         public ICollection<CourseGrade>? CourseGrades { get; set; }
     }
 }

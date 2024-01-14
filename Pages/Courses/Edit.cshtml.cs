@@ -8,9 +8,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Cursuri.Data;
 using Cursuri.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Cursuri.Pages.Courses
 {
+    [Authorize(Roles = "Admin")]
+
     public class EditModel : CourseGradesPageModel
     {
         private readonly Cursuri.Data.CursuriContext _context;

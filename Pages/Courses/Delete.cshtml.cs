@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Cursuri.Data;
 using Cursuri.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Cursuri.Pages.Courses
 {
+    [Authorize(Roles = "Admin")]
+
     public class DeleteModel : PageModel
     {
         private readonly Cursuri.Data.CursuriContext _context;

@@ -93,6 +93,32 @@ namespace Cursuri.Migrations
                     b.ToTable("CourseGrade");
                 });
 
+            modelBuilder.Entity("Cursuri.Models.Enrolling", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
+
+                    b.Property<int?>("CourseID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EnrolmentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("MemberID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CourseID");
+
+                    b.HasIndex("MemberID");
+
+                    b.ToTable("Enrolling");
+                });
+
             modelBuilder.Entity("Cursuri.Models.Grade", b =>
                 {
                     b.Property<int>("ID")
@@ -108,6 +134,35 @@ namespace Cursuri.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Grade");
+                });
+
+            modelBuilder.Entity("Cursuri.Models.Member", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
+
+                    b.Property<string>("Adress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Member");
                 });
 
             modelBuilder.Entity("Cursuri.Models.Professor", b =>
@@ -163,6 +218,21 @@ namespace Cursuri.Migrations
                     b.Navigation("Grade");
                 });
 
+            modelBuilder.Entity("Cursuri.Models.Enrolling", b =>
+                {
+                    b.HasOne("Cursuri.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseID");
+
+                    b.HasOne("Cursuri.Models.Member", "Member")
+                        .WithMany("Enrollments")
+                        .HasForeignKey("MemberID");
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Member");
+                });
+
             modelBuilder.Entity("Cursuri.Models.City", b =>
                 {
                     b.Navigation("Courses");
@@ -176,6 +246,11 @@ namespace Cursuri.Migrations
             modelBuilder.Entity("Cursuri.Models.Grade", b =>
                 {
                     b.Navigation("CourseGrades");
+                });
+
+            modelBuilder.Entity("Cursuri.Models.Member", b =>
+                {
+                    b.Navigation("Enrollments");
                 });
 
             modelBuilder.Entity("Cursuri.Models.Professor", b =>

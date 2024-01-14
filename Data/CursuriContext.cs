@@ -21,5 +21,9 @@ namespace Cursuri.Data
         public DbSet<Cursuri.Models.Professor>? Professor { get; set; }
 
         public DbSet<Cursuri.Models.Grade>? Grade { get; set; }
+
+        public DbSet<Cursuri.Models.Member>? Member { get; set; }
+
+        public DbSet<Cursuri.Models.Enrolling>? Enrolling { get; set; }
     }
 }
