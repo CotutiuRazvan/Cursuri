@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Cursuri.Data;
 using Cursuri.Models;
+using Cursuri.Models.ViewModels;
 
 namespace Cursuri.Pages.Grades
 {
@@ -20,12 +21,24 @@ namespace Cursuri.Pages.Grades
         }
 
         public IList<Grade> Grade { get;set; } = default!;
-
-        public async Task OnGetAsync()
+        public GradeIndexData GradeData { get; set; }
+        public int GradeID { get; set; }
+        public int CourseID { get; set; }
+        public async Task OnGetAsync(int? id, int? bookID)
         {
-            if (_context.Grade != null)
+            GradeData = new GradeIndexData();
+            GradeData.Grades = await _context.Grade
+                .Include(i => i.CourseGrades)
+                    .ThenInclude(i => i.Course)
+                    .ThenInclude(c => c.Professor)
+                .OrderBy(i => i.GradeType)
+                .ToListAsync();
+            if (id != null)
             {
-                Grade = await _context.Grade.ToListAsync();
+                GradeID = id.Value;
+                Grade grade = GradeData.Grades
+                    .Where(i => i.ID == id.Value).Single();
+                GradeData.CourseGrades = grade.CourseGrades;
             }
         }
     }
